@@ -1,18 +1,10 @@
 import { NextResponse } from 'next/server';
 import type { NextRequest } from 'next/server';
-import jwt from 'jsonwebtoken';
-import { JWTPayload } from '@/types/auth';
 
 /**
  * @runtime nodejs
  * Force Node.js runtime for JWT support
  */
-
-const JWT_SECRET = process.env.JWT_SECRET!;
-
-if (!JWT_SECRET) {
-  throw new Error('JWT_SECRET environment variable is required');
-}
 
 // Force Node.js runtime for middleware to support JWT
 export const runtime = 'nodejs';
@@ -27,15 +19,30 @@ export async function middleware(request: NextRequest) {
    if (request.nextUrl.pathname === '/login') {
      if (token) {
        try {
-         const decoded = jwt.verify(token, JWT_SECRET) as JWTPayload;
-         const now = Math.floor(Date.now() / 1000);
+         // Use API route for token verification (runs in Node.js runtime)
+         const verifyResponse = await fetch(`${request.nextUrl.origin}/api/auth/verify`, {
+           method: 'POST',
+           headers: {
+             'Content-Type': 'application/json',
+           },
+           body: JSON.stringify({ token }),
+         });
 
-         if (decoded.exp >= now) {
+         const verifyResult = await verifyResponse.json();
+
+         if (verifyResult.valid) {
            // User is authenticated and token is valid, redirect to dashboard
            return NextResponse.redirect(new URL('/dashboard', request.url));
+         } else {
+           // Token is invalid, clear it and allow access to login
+           const response = NextResponse.next();
+           response.cookies.delete('auth-token');
+           response.cookies.delete('refresh-token');
+           return response;
          }
+
        } catch (error) {
-         // Token is invalid, clear it and allow access to login
+         // Token verification failed, clear it and allow access to login
          const response = NextResponse.next();
          response.cookies.delete('auth-token');
          response.cookies.delete('refresh-token');
