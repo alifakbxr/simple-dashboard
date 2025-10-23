@@ -26,7 +26,7 @@ export default function DashboardPage() {
         setUsers(usersData);
         setPosts(postsData);
       } catch (error) {
-        console.error('Error fetching data:', error);
+        // Error fetching data - could add proper error handling here
       } finally {
         setLoading(false);
       }

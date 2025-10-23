@@ -22,6 +22,8 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     // Check if user is logged in on mount (client-side only)
     const checkAuth = async () => {
       try {
+        // Add a small delay to ensure cookies are set
+        await new Promise(resolve => setTimeout(resolve, 100));
         const response = await fetch('/api/auth/me');
         if (response.ok) {
           const userData = await response.json();
@@ -30,7 +32,6 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
           setUser(null);
         }
       } catch (error) {
-        console.error('Auth check failed:', error);
         setUser(null);
       } finally {
         setIsLoading(false);
@@ -39,6 +40,34 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
 
     checkAuth();
   }, []);
+
+  // Add token refresh functionality
+  useEffect(() => {
+    if (!user) return;
+
+    const refreshToken = async () => {
+      try {
+        const response = await fetch('/api/auth/refresh', {
+          method: 'POST',
+        });
+
+        if (response.ok) {
+          const data = await response.json();
+          // Token refreshed successfully, continue with current user
+        } else {
+          // Refresh failed, user needs to login again
+          setUser(null);
+        }
+      } catch (error) {
+        setUser(null);
+      }
+    };
+
+    // Set up periodic token refresh (every 50 minutes)
+    const refreshInterval = setInterval(refreshToken, 50 * 60 * 1000);
+
+    return () => clearInterval(refreshInterval);
+  }, [user]);
 
   // Prevent hydration mismatch by not rendering until mounted
   if (!mounted) {

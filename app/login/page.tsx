@@ -27,13 +27,14 @@ export default function LoginPage() {
       const data = await response.json();
 
       if (data.success) {
-        // Redirect to dashboard on successful login
-        router.push('/dashboard');
+        // Small delay to allow cookie setting, then redirect
+        setTimeout(() => {
+          router.push('/dashboard');
+        }, 100);
       } else {
         setError(data.error || 'Login failed');
       }
     } catch (err) {
-      console.error('Login error:', err);
       setError('Network error. Please try again.');
     } finally {
       setIsLoading(false);

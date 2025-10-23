@@ -40,7 +40,6 @@ export function Header({ isOpen, setIsOpen }: HeaderProps) {
       await fetch('/api/auth/logout', { method: 'POST' });
       router.push('/login');
     } catch (error) {
-      console.error('Logout error:', error);
       // Still redirect even if API call fails
       router.push('/login');
     }
