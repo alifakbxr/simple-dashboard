@@ -2,6 +2,8 @@ import { NextRequest, NextResponse } from 'next/server';
 import jwt from 'jsonwebtoken';
 import { User } from '@/types/user';
 
+export const runtime = 'nodejs';
+
 const JWT_SECRET = process.env.JWT_SECRET!;
 
 export async function GET(request: NextRequest) {

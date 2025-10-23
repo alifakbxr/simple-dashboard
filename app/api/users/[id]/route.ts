@@ -1,6 +1,8 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { User } from '@/types/user';
 
+export const runtime = 'nodejs';
+
 export async function GET(request: Request, { params }: { params: Promise<{ id: string }> }) {
   try {
     const { id } = await params;

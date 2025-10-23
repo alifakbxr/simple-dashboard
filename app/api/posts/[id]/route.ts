@@ -1,6 +1,8 @@
 import { NextResponse } from 'next/server';
 import { Post } from '@/types/post';
 
+export const runtime = 'nodejs';
+
 export async function GET(
   request: Request,
   { params }: { params: Promise<{ id: string }> }
